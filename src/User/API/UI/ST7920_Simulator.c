@@ -41,21 +41,21 @@ const uint16_t st7920_gx_dot = ST7920_GXDOT;
 const uint16_t st7920_gy_dot = ST7920_GYDOT;
 void ST7920_DrawPixel(int16_t x, int16_t y, bool isForeGround)
 {
-  GUI_FillRectColor(st7920_gx_start_full + st7920_gx_dot_full * x,
-                    st7920_gy_start_full + st7920_gy_dot_full * y,
-                    st7920_gx_start_full + st7920_gx_dot_full * (x+1),
-                    st7920_gy_start_full + st7920_gy_dot_full * (y+1),
+  GUI_FillRectColor(st7920_gx_start + st7920_gx_dot * x,
+                    st7920_gy_start + st7920_gy_dot * y,
+                    st7920_gx_start + st7920_gx_dot * (x+1),
+                    st7920_gy_start + st7920_gy_dot * (y+1),
                     isForeGround ? WHITE : BLACK);
 }
 
 void ST7920_DrawCharPixel(int16_t sx, int16_t sy, int16_t x, int16_t y, bool isForeGround)
 {
-  const float st7920_cx_dot_full = (ST7920_GXDOT_FULLSCREEN * 8.0f) / BYTE_WIDTH;
-  const float st7920_cy_dot_full = (ST7920_GYDOT_FULLSCREEN * 16.0f) / BYTE_HEIGHT;
-  GUI_FillRectColor(st7920_gx_start_full + st7920_gx_dot_full * sx + st7920_cx_dot_full * x,
-                    st7920_gy_start_full + st7920_gy_dot_full * sy + st7920_cy_dot_full * y,
-                    st7920_gx_start_full + st7920_gx_dot_full * sx + st7920_cx_dot_full * (x+1),
-                    st7920_gy_start_full + st7920_gy_dot_full * sy + st7920_cy_dot_full * (y+1),
+  const uint16_t st7920_cx_dot = (st7920_gx_dot * 8) / BYTE_WIDTH;
+  const uint16_t st7920_cy_dot = (st7920_gy_dot * 16) / BYTE_HEIGHT;
+  GUI_FillRectColor(st7920_gx_start + st7920_gx_dot * sx + st7920_cx_dot * x,
+                    st7920_gy_start + st7920_gy_dot * sy + st7920_cy_dot * y ,
+                    st7920_gx_start + st7920_gx_dot * sx + st7920_cx_dot * (x+1),
+                    st7920_gy_start + st7920_gy_dot * sy + st7920_cy_dot * (y+1),
                     isForeGround ? WHITE : BLACK);
 }
 

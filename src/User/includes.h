@@ -23,8 +23,6 @@
 #include "CircularQueue.h"
 #include "spi_slave.h"
 
-#include "ST7920_Simulator.h"
-
 #ifndef ST7920_SPI
   #error "No ST7920"
 #endif

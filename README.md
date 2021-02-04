@@ -13,7 +13,7 @@ Precompiled binares can be found in the [binares](binaries) folder.
 | [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | NO     |
 | [BIGTREE_TFT28_V3_0](binaries/BIGTREE_TFT28_V3_0)        | NO     |
 | [BIGTREE_TFT35_B1_V3_0](binaries/BIGTREE_TFT35_B1_V3_0)  | NO     |
-| [BIGTREE_TFT35_E3_V3_0](binaries/BIGTREE_TFT35_E3_V3_0)  | NO     |
+| [BIGTREE_TFT35_E3_V3_0](binaries/BIGTREE_TFT35_E3_V3_0)  | YES    |
 | [BIGTREE_TFT35_V3_0](binaries/BIGTREE_TFT35_V3_0)        | YES    |
 | [BIGTREE_TFT43_V3_0](binaries/BIGTREE_TFT43_V3_0)        | NO     |
 | [BIGTREE_TFT50_V3_0](binaries/BIGTREE_TFT50_V3_0)        | NO     |
@@ -21,6 +21,9 @@ Precompiled binares can be found in the [binares](binaries) folder.
 | [MKS_28_V1_0](binaries/MKS_28_V1_0)                      | NO     |
 | [MKS_32_V1_4](binaries/MKS_32_V1_4)                      | NO     |
 | [MKS_32_V1_4_NOBL](binaries/MKS_32_V1_4_NOBL)            | NO     |
+
+## Installation and configuration
+Check out the wiki for installation instructions and example configurations.
 
 # Further development
 This project is ment not to be BTT exclusive. To achieve this goal we need to move away from the BTT sources and on to a more flexible framework. If you want your screen to be supported, feel free to create a MR.

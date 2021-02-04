@@ -8,7 +8,9 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-void SPI_Slave();
+#include "CircularQueue.h"
+
+void SPI_Slave(CIRCULAR_QUEUE *queue);
 bool SPI_SlaveGetData(uint8_t *data);
 
 #ifdef __cplusplus

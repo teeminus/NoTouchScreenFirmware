@@ -10,7 +10,7 @@ Precompiled binares can be found in the [binares](binaries) folder.
 
 | Environment                                              | Tested |
 |----------------------------------------------------------|--------|
-| [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | NO     |
+| [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | YES    |
 | [BIGTREE_TFT28_V3_0](binaries/BIGTREE_TFT28_V3_0)        | NO     |
 | [BIGTREE_TFT35_B1_V3_0](binaries/BIGTREE_TFT35_B1_V3_0)  | NO     |
 | [BIGTREE_TFT35_E3_V3_0](binaries/BIGTREE_TFT35_E3_V3_0)  | YES    |
@@ -29,4 +29,4 @@ Check out the wiki for installation instructions and example configurations.
 This project is ment not to be BTT exclusive. To achieve this goal we need to move away from the BTT sources and on to a more flexible framework. If you want your screen to be supported, feel free to create a MR.
 
 # Support
-If you like this project and/or want to support further development you might consider to <a href="https://www.buymeacoffee.com/teeminus" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a> or [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L03JDC5)
+If you like this project and/or want to support further development you might consider to [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/L3L03JDC5) or <a href="https://www.buymeacoffee.com/teeminus" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a>

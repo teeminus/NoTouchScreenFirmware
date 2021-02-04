@@ -94,7 +94,8 @@ int main(void)
   St7920Emulator st7920Emulator(clearDisplay, drawByte);
 
   // Init slave SPI
-  SPI_Slave();
+  CIRCULAR_QUEUE spiQueue;
+  SPI_Slave(&spiQueue);
 
   // Endless loop
   uint8_t data;

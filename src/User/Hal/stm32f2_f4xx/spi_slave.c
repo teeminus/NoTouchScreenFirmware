@@ -18,7 +18,7 @@
   #define ST7920_SPI_NUM          SPI3
 #endif
 
-volatile CIRCULAR_QUEUE spi_queue;
+volatile CIRCULAR_QUEUE *spi_queue = NULL;
 
 void SPI_Enable(u8 mode)
 {
@@ -41,11 +41,12 @@ void SPI_Enable(u8 mode)
   ST7920_SPI_NUM->CR1 |= (1<<6);
 }
 
-void SPI_Slave()
+void SPI_Slave(CIRCULAR_QUEUE *queue)
 {
   // initializes the initial queue indexes before the queue is used.
   // Otherwise, dirty values will let the system probably freeze when the queue is used
-  spi_queue.index_r = spi_queue.index_w = 0;
+  spi_queue = queue;
+  spi_queue->index_r = spi_queue->index_w = 0;
 
   NVIC_InitTypeDef NVIC_InitStructure;
 
@@ -64,16 +65,16 @@ void SPI_Slave()
 
 void SPI2_IRQHandler(void)
 {
-  spi_queue.data[spi_queue.index_w] = ST7920_SPI_NUM->DR;
-  spi_queue.index_w = (spi_queue.index_w + 1) % CIRCULAR_QUEUE_SIZE;
+  spi_queue->data[spi_queue->index_w] = ST7920_SPI_NUM->DR;
+  spi_queue->index_w = (spi_queue->index_w + 1) % CIRCULAR_QUEUE_SIZE;
 }
 
 bool SPI_SlaveGetData(uint8_t *data)
 {
-  if (spi_queue.index_r != spi_queue.index_w)
+  if (spi_queue->index_r != spi_queue->index_w)
   {
-    *data = spi_queue.data[spi_queue.index_r];
-    spi_queue.index_r = (spi_queue.index_r + 1) % CIRCULAR_QUEUE_SIZE;
+    *data = spi_queue->data[spi_queue->index_r];
+    spi_queue->index_r = (spi_queue->index_r + 1) % CIRCULAR_QUEUE_SIZE;
     return true;
   }
   return false;

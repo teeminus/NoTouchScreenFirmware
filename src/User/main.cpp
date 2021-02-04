@@ -38,8 +38,6 @@ void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   }
 }
 
-St7920Emulator st7920Emulator(clearDisplay, drawByte);
-
 int main(void)
 {
   // Set vector table offset
@@ -91,6 +89,9 @@ int main(void)
       ++x;
     }
   }
+
+  // Create emulator handle
+  St7920Emulator st7920Emulator(clearDisplay, drawByte);
 
   // Init slave SPI
   SPI_Slave();

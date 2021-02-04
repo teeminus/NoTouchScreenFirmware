@@ -10,7 +10,7 @@ Precompiled binares can be found in the [binares](binaries) folder.
 
 | Environment                                              | Tested |
 |----------------------------------------------------------|--------|
-| [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | NO     |
+| [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | YES    |
 | [BIGTREE_TFT28_V3_0](binaries/BIGTREE_TFT28_V3_0)        | NO     |
 | [BIGTREE_TFT35_B1_V3_0](binaries/BIGTREE_TFT35_B1_V3_0)  | NO     |
 | [BIGTREE_TFT35_E3_V3_0](binaries/BIGTREE_TFT35_E3_V3_0)  | YES    |

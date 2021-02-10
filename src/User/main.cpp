@@ -10,30 +10,43 @@
 #define ST7920_GXSTART ((LCD_WIDTH - ST7920_DOTSIZE * ST7920_GXROWS) / 2)
 #define ST7920_GYSTART ((LCD_HEIGHT - ST7920_DOTSIZE * ST7920_GYROWS) / 2)
 
+//#define ROTATE_180
+#if defined(ROTATE_180)
+  #define FILLRECT(X,Y,W,H,C) \
+  { \
+    uint16_t x0 = LCD_WIDTH - (X) - (W) - 1; \
+    uint16_t y0 = LCD_HEIGHT - (Y) - (H) - 1; \
+    GUI_FillRectColor(x0, y0, x0 + W, y0 + H, C); \
+  }
+#else
+  #define FILLRECT(X,Y,W,H,C) \
+    GUI_FillRectColor(X, Y, X + W, Y + H, C);
+#endif
+
 void clearDisplay() {
   // Clear ST7920 gui rect
-  GUI_FillRectColor(ST7920_GXSTART,
-                    ST7920_GYSTART,
-                    ST7920_GXSTART + ST7920_DOTSIZE * ST7920_GXROWS,
-                    ST7920_GYSTART + ST7920_DOTSIZE * ST7920_GYROWS,
-                    BLACK);
+  FILLRECT(ST7920_GXSTART,
+           ST7920_GYSTART,
+           ST7920_DOTSIZE * ST7920_GXROWS,
+           ST7920_DOTSIZE * ST7920_GYROWS,
+           BLACK);
 }
 void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   // Loop over all bits
   for (uint8_t i = 0; i < 8; ++i, ++x) {
     // Check if bit is set
     if ((d & (1 << i)) > 0) {
-      GUI_FillRectColor(ST7920_GXSTART + x * ST7920_DOTSIZE,
-                        ST7920_GYSTART + y * ST7920_DOTSIZE,
-                        ST7920_GXSTART + (x + 1)* ST7920_DOTSIZE,
-                        ST7920_GYSTART + (y + 1)* ST7920_DOTSIZE,
-                        WHITE);
+      FILLRECT(ST7920_GXSTART + x * ST7920_DOTSIZE,
+               ST7920_GYSTART + y * ST7920_DOTSIZE,
+               ST7920_DOTSIZE,
+               ST7920_DOTSIZE,
+               WHITE);
     } else {
-      GUI_FillRectColor(ST7920_GXSTART + x * ST7920_DOTSIZE,
-                        ST7920_GYSTART + y * ST7920_DOTSIZE,
-                        ST7920_GXSTART + (x + 1)* ST7920_DOTSIZE,
-                        ST7920_GYSTART + (y + 1)* ST7920_DOTSIZE,
-                        BLACK);
+      FILLRECT(ST7920_GXSTART + x * ST7920_DOTSIZE,
+              ST7920_GYSTART + y * ST7920_DOTSIZE,
+              ST7920_DOTSIZE,
+              ST7920_DOTSIZE,
+              BLACK);
     }
   }
 }
@@ -82,7 +95,7 @@ int main(void)
   for (uint16_t i = 0, x = (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2; i < sizeof(pTitle); ++i, ++x) {
     for (uint8_t y = 0; y < 8; ++y) {
       if ((pTitle[i] & (1 << y)) > 0) {
-        GUI_FillRectColor(x, y, x + 1, y + 1, WHITE);
+        FILLRECT(x, y, 1, 1, WHITE);
       }
     }
     if ((i % 5) == 4) {

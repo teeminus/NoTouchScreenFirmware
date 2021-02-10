@@ -24,6 +24,9 @@
 
 // LCD Backlight pin (PWM can adjust brightness)
 #define LCD_LED_PIN            PA8
+#define LCD_LED_PIN_ALTERNATE  0
+#define LCD_LED_PWM_CHANNEL    _TIM1_CH1
+#define LCD_LED_PWM_BRIGHTNESS 100
 
 // SD Card SPI pins
 #define SD_SPI_SUPPORT

@@ -85,7 +85,7 @@ int main(void)
   }
 
   // Init LCD
-  LCD_Init();
+  LCD_Init(&rccClocks);
 
   // Clear screen
   GUI_Clear(BLACK);

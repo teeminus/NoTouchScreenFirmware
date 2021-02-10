@@ -1,20 +1,38 @@
 #include "LCD_Init.h"
 #include "GPIO_Init.h"
 #include "includes.h"
+#include "timer_pwm.h"
 
 
 #ifdef LCD_LED_PIN
 void LCD_LED_On()
 {
-  GPIO_SetLevel(LCD_LED_PIN, 1);
+  #if defined(LCD_LED_PWM_CHANNEL)
+    #if defined(LCD_LED_PWM_BRIGHTNESS)
+      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, LCD_LED_PWM_BRIGHTNESS);
+    #else
+      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, 100);
+    #endif
+  #else
+    GPIO_SetLevel(LCD_LED_PIN, 1);
+  #endif
 }
 void LCD_LED_Off()
 {
-  GPIO_SetLevel(LCD_LED_PIN, 0);
+  #if defined(LCD_LED_PWM_CHANNEL)
+    TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, 0);
+  #else
+    GPIO_SetLevel(LCD_LED_PIN, 0);
+  #endif
 }
-void LCD_LED_Init(void)
+void LCD_LED_Init(RCC_ClocksTypeDef* rccClocks)
 {
-  GPIO_InitSet(LCD_LED_PIN, MGPIO_MODE_OUT_PP, 0);
+  #if defined(LCD_LED_PWM_CHANNEL)
+    GPIO_InitSet(LCD_LED_PIN, MGPIO_MODE_AF_PP, LCD_LED_PIN_ALTERNATE);
+    TIM_PWM_Init(LCD_LED_PWM_CHANNEL, rccClocks);
+  #else
+    GPIO_InitSet(LCD_LED_PIN, MGPIO_MODE_OUT_PP, 0);
+  #endif
   LCD_LED_Off();
 }
 #endif
@@ -489,7 +507,7 @@ void LCD_RefreshDirection(void)
   LCD_WR_DATA(TFTLCD_0_DEGREE_REG_VALUE);
 }
 
-void LCD_Init(void)
+void LCD_Init(RCC_ClocksTypeDef* rccClocks)
 {
   LCD_HardwareConfig();
   LCD_init_RGB();
@@ -497,7 +515,7 @@ void LCD_Init(void)
   Delay_ms(120);
 
 #ifdef LCD_LED_PIN
-  LCD_LED_Init();
+  LCD_LED_Init(rccClocks);
   LCD_LED_On();
 #endif
 }

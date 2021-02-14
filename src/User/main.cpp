@@ -2,6 +2,7 @@
 
 #include "myfatfs.h"
 #include "ff.h"
+#include "timer.h"
 
 #include "St7920Emulator.hpp"
 
@@ -117,15 +118,71 @@ int main(void)
   CIRCULAR_QUEUE spiQueue;
   SPI_Slave(&spiQueue);
 
+  // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
+  // Init timer
+  Timer_Init(&rccClocks);
+
+  // Loop veriables
+  bool bScreenOn = true;
+  uint8_t ui8CurrentEncoder;
+  uint8_t ui8LastEncoder = 0;
+  uint32_t ui32CurrentMs;
+  uint32_t ui32LastActive = 0;
+#endif
+
   // Endless loop
   uint8_t data;
-  while(true)
-  {
+  while(true) {
     // Check if SPI data is available
-    if (SPI_SlaveGetData(&data))
-    {
+    if (SPI_SlaveGetData(&data)) {
       // Parse data
       st7920Emulator.parseSerialData(data);
     }
+
+    // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
+    // Read current encoder value
+    ui8CurrentEncoder = Encoder_Read();
+
+    // Get current time
+    ui32CurrentMs = Timer_GetTimerMs();
+
+    // Compare to last value
+    if (ui8CurrentEncoder != ui8LastEncoder) {
+      // Store current value
+      ui8LastEncoder = ui8CurrentEncoder;
+
+      // Check if screen is off
+      if (!bScreenOn) {
+        // Turn on screen
+        LCD_LED_On();
+
+        // Set flag
+        bScreenOn = true;
+      }
+
+      // Store current time
+      ui32LastActive = ui32CurrentMs;
+    }
+    // Check if screen is on
+    else if (bScreenOn) {
+      // Get difference to last active timestamp
+      if (ui32CurrentMs >= ui32LastActive) {
+        ui32CurrentMs = ui32CurrentMs - ui32LastActive;
+      } else {
+        ui32CurrentMs = 0xFFFFFFFF - ui32LastActive + ui32CurrentMs + 1;
+      }
+
+      // Check inactivity time
+      if (ui32CurrentMs >= LCD_IDLE_TIMEOUT * 1000) {
+        // Turn off screen
+        LCD_LED_Off();
+
+        // Clear flag
+        bScreenOn = false;
+      }
+    }
+#endif
   }
 }

@@ -16,6 +16,11 @@ extern "C" {
 void LCD_RefreshDirection(void);
 void LCD_Init(RCC_ClocksTypeDef* rccClocks);
 
+#ifdef LCD_LED_PIN
+void LCD_LED_On();
+void LCD_LED_Off();
+#endif
+
 #ifdef __cplusplus
 }
 #endif

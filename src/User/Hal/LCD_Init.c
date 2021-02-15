@@ -7,11 +7,7 @@
 void LCD_LED_On()
 {
   #if defined(LCD_PWM_DIMMER)
-    #if defined(LCD_LED_PWM_ON_BRIGHTNESS)
-      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, LCD_LED_PWM_ON_BRIGHTNESS);
-    #else
-      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, 100);
-    #endif
+    TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, LCD_LED_PWM_ON_BRIGHTNESS);
   #else
     GPIO_SetLevel(LCD_LED_PIN, 1);
   #endif
@@ -19,11 +15,7 @@ void LCD_LED_On()
 void LCD_LED_Off()
 {
   #if defined(LCD_PWM_DIMMER)
-    #if defined(LCD_LED_PWM_OFF_BRIGHTNESS)
-      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, LCD_LED_PWM_OFF_BRIGHTNESS);
-    #else
-      TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, 0);
-    #endif
+    TIM_PWM_SetDutyCycle(LCD_LED_PWM_CHANNEL, LCD_LED_PWM_OFF_BRIGHTNESS);
   #else
     GPIO_SetLevel(LCD_LED_PIN, 0);
   #endif

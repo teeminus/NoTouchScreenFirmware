@@ -175,7 +175,7 @@ int main(void)
       }
 
       // Check inactivity time
-      if (ui32CurrentMs >= LCD_IDLE_TIMEOUT * 1000) {
+      if (ui32CurrentMs >= LCD_IDLE_TIMEOUT_SEC * 1000) {
         // Turn off screen
         LCD_LED_Off();
 

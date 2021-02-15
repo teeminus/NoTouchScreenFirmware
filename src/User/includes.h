@@ -35,6 +35,19 @@
   #if !defined(LCD_LED_PWM_CHANNEL)
     #error "LCD_PWM_DIMMER requires LCD_LED_PWM_CHANNEL"
   #endif
+  #if !defined(LCD_LED_PWM_ON_BRIGHTNESS)
+    #define LCD_LED_PWM_ON_BRIGHTNESS 100
+  #elif LCD_LED_PWM_ON_BRIGHTNESS > 100
+    #define LCD_LED_PWM_ON_BRIGHTNESS 100  
+  #endif
+  #if !defined(LCD_LED_PWM_OFF_BRIGHTNESS)
+    #define LCD_LED_PWM_OFF_BRIGHTNESS 20
+  #elif LCD_LED_PWM_OFF_BRIGHTNESS < 0
+    #define LCD_LED_PWM_OFF_BRIGHTNESS 0
+  #endif
+  #if LCD_LED_PWM_ON_BRIGHTNESS <= LCD_LED_PWM_OFF_BRIGHTNESS
+    #error "LCD_LED_PWM_ON_BRIGHTNESS needs to be greather than LCD_LED_PWM_OFF_BRIGHTNESS"
+  #endif
 #endif
 #if defined(LCD_IDLE_OFF)
   #if !LCD_ENCODER_SUPPORT

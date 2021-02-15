@@ -114,6 +114,9 @@ int main(void)
   }
   st7920Emulator.reset(false);
 
+  // Add first part of header line
+  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
+
   // Init slave SPI
   CIRCULAR_QUEUE spiQueue;
   SPI_Slave(&spiQueue);
@@ -131,13 +134,46 @@ int main(void)
   uint32_t ui32LastActive = 0;
 #endif
 
+  // Add second part of header line
+  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
+
   // Endless loop
+  uint16_t ui16X = 0, ui16Y = 0;
+  uint16_t ui16Color = WHITE;
   uint8_t data;
   while(true) {
     // Check if SPI data is available
     if (SPI_SlaveGetData(&data)) {
       // Parse data
       st7920Emulator.parseSerialData(data);
+
+      // Draw new pixel
+      FILLRECT(ui16X, ui16Y, 1, 1, ui16Color);
+
+      // Move to next pixel
+      if (ui16X < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1)) {
+        ++ui16X;
+      } else if (ui16X == ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1)) {
+        ui16X = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2;
+      } else if (ui16X < (LCD_WIDTH - 1)) {
+        ++ui16X;
+      } else {
+        ui16X = 0;
+
+        // Wrap to next line
+        if (ui16Y < 6) {
+          ++ui16Y;
+        } else {
+          ui16Y = 0;
+
+          // Invert color
+          if (ui16Color == WHITE) {
+            ui16Color = BLACK;
+          } else {
+            ui16Color = WHITE;
+          }
+        }
+      }
     }
 
     // Check if lcd idle off is enabled

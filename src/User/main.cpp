@@ -67,6 +67,18 @@ int main(void)
   // Init delay
   Delay_init(rccClocks.HCLK_Frequency);
 
+  // Disable JTAG
+  #ifdef DISABLE_JTAG
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); // disable JTAG, enable SWD
+  #endif
+
+  // Disable SWJ
+  #ifdef DISABLE_DEBUG
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE); //disable JTAG & SWD
+  #endif
+
   // Mount SD card
   if(mountSDCard())
   {
@@ -137,9 +149,13 @@ int main(void)
   // Add second part of header line
   FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
 
-  // Endless loop
+  // Variables for SPI data received indicator
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
   uint16_t ui16X = 0, ui16Y = 0;
   uint16_t ui16Color = WHITE;
+#endif
+
+  // Endless loop
   uint8_t data;
   while(true) {
     // Check if SPI data is available
@@ -147,13 +163,15 @@ int main(void)
       // Parse data
       st7920Emulator.parseSerialData(data);
 
+      // Update SPI data received indicator
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
       // Draw new pixel
       FILLRECT(ui16X, ui16Y, 1, 1, ui16Color);
 
       // Move to next pixel
-      if (ui16X < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1)) {
+      if (ui16X < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
         ++ui16X;
-      } else if (ui16X == ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1)) {
+      } else if (ui16X == ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
         ui16X = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2;
       } else if (ui16X < (LCD_WIDTH - 1)) {
         ++ui16X;
@@ -174,6 +192,7 @@ int main(void)
           }
         }
       }
+#endif
     }
 
     // Check if lcd idle off is enabled

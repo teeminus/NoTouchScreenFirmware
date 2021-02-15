@@ -1,5 +1,8 @@
 #pragma once
 
+// Enable SPI data received indicator
+#define SPI_DATA_RECEIVED_INDICATOR
+
 // Enable LCD backlight beeing controlled by PWM
 //#define LCD_PWM_DIMMER
 #if defined(LCD_PWM_DIMMER)

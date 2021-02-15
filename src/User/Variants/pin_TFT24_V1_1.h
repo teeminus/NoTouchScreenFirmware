@@ -26,7 +26,6 @@
 #define LCD_LED_PIN            PA8
 #define LCD_LED_PIN_ALTERNATE  0
 #define LCD_LED_PWM_CHANNEL    _TIM1_CH1
-#define LCD_LED_PWM_BRIGHTNESS 100
 
 // SD Card SPI pins
 #define SD_SPI_SUPPORT
@@ -42,5 +41,11 @@
 
 // ST7920 Simulator SPI pins
 #define ST7920_SPI    _SPI2
+
+// LCD Encoder support
+#define LCD_ENCA_PIN    PB0
+#define LCD_ENCB_PIN    PB1
+#define LCD_BTN_PIN     PB2
+#define LCD_ENC_EN_PIN  PB11
 
 #endif

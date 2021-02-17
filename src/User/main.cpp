@@ -133,16 +133,26 @@ int main(void)
   CIRCULAR_QUEUE spiQueue;
   SPI_Slave(&spiQueue);
 
-  // Check if lcd idle off is enabled
-#if defined(LCD_IDLE_OFF)
+  // Init encoder
+  Encoder_Init();
+
+  // Check for encoder support
+#if LCD_ENCODER_SUPPORT
   // Init timer
   Timer_Init(&rccClocks);
 
+  // Loop variables
+  uint8_t ui8CurrentEncoder;
+  uint32_t ui32CurrentMs;
+  uint32_t ui32FirstBtnPress = 0;
+  uint32_t ui32Tmp;
+#endif
+
+  // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
   // Loop veriables
   bool bScreenOn = true;
-  uint8_t ui8CurrentEncoder;
   uint8_t ui8LastEncoder = 0;
-  uint32_t ui32CurrentMs;
   uint32_t ui32LastActive = 0;
 #endif
 
@@ -195,14 +205,64 @@ int main(void)
 #endif
     }
 
-    // Check if lcd idle off is enabled
-#if defined(LCD_IDLE_OFF)
+#if LCD_ENCODER_SUPPORT
     // Read current encoder value
     ui8CurrentEncoder = Encoder_Read();
 
     // Get current time
     ui32CurrentMs = Timer_GetTimerMs();
 
+    // Check if encoder button is pressed
+    if ((ui8CurrentEncoder & LCD_ENCODER_BTN_SET) > 0) {
+      // Check if we need to store the current timestamp
+      if (ui32FirstBtnPress == 0) {
+        // Store current timestamp
+        if (ui32CurrentMs == 0) {
+          ui32FirstBtnPress = 1;
+        } else {
+          ui32FirstBtnPress = ui32CurrentMs;
+        }
+      }
+    } else if (ui32FirstBtnPress > 0) {
+      // Get difference to last active timestamp
+      if (ui32CurrentMs >= ui32FirstBtnPress) {
+        ui32Tmp = ui32CurrentMs - ui32FirstBtnPress;
+      } else {
+        ui32Tmp = 0xFFFFFFFF - ui32FirstBtnPress + ui32CurrentMs + 1;
+      }
+
+      // Check if timeout has been expired
+      if (ui32Tmp >= 5 * 1000) {
+        // Turn off backlight
+        #ifdef LCD_LED_PIN
+          LCD_LED_Off();
+        #endif
+
+        // Reset SPI
+        SPI_SlaveDeinit();
+
+        // Wait half a second
+        Delay_ms(100);
+
+        // Init SPI
+        SPI_Slave(&spiQueue);
+
+        // Turn on backlight
+        #ifdef LCD_LED_PIN
+          LCD_LED_On();
+        #endif
+
+        // Reset emulator
+        st7920Emulator.reset(true);
+      }
+
+      // Clear falg
+      ui32FirstBtnPress = 0;
+    }
+#endif
+
+    // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
     // Compare to last value
     if (ui8CurrentEncoder != ui8LastEncoder) {
       // Store current value
@@ -224,13 +284,13 @@ int main(void)
     else if (bScreenOn) {
       // Get difference to last active timestamp
       if (ui32CurrentMs >= ui32LastActive) {
-        ui32CurrentMs = ui32CurrentMs - ui32LastActive;
+        ui32Tmp = ui32CurrentMs - ui32LastActive;
       } else {
-        ui32CurrentMs = 0xFFFFFFFF - ui32LastActive + ui32CurrentMs + 1;
+        ui32Tmp = 0xFFFFFFFF - ui32LastActive + ui32CurrentMs + 1;
       }
 
       // Check inactivity time
-      if (ui32CurrentMs >= LCD_IDLE_TIMEOUT_SEC * 1000) {
+      if (ui32Tmp >= LCD_IDLE_TIMEOUT_SEC * 1000) {
         // Turn off screen
         LCD_LED_Off();
 

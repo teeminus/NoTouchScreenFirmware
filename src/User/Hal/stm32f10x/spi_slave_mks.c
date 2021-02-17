@@ -50,6 +50,10 @@ void SPI_Slave(CIRCULAR_QUEUE *queue)
   spi_queue = queue;
   spi_queue->index_r = spi_queue->index_w = 0;
 
+  // Reset SPI3
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, ENABLE);
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, DISABLE);
+
   // Init SPI
   // if enabled, it avoids any SPI3 CS pin usage and free the MISO (PB4 pin) for encoder pins
 #ifndef SPI3_PIN_SMART_USAGE
@@ -88,12 +92,30 @@ void SPI_Slave(CIRCULAR_QUEUE *queue)
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
-#endif
 
   // Check if we need to enable the SPI interface
-  //  if ((GPIOB->IDR & (1<<12)) != 0) { // always leave this line commented out!
+  if ((GPIOB->IDR & (1<<1)) != 0) {
     SPI_Enable(1);
   }
+#else
+  // Enable SPI
+  SPI_Enable(0);
+#endif
+}
+
+void SPI_SlaveDeinit() {
+  // Disable interrupts
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = SPI3_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  // Reset SPI
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, ENABLE);
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, DISABLE);
 }
 
 void EXTI1_IRQHandler(void)
@@ -104,8 +126,8 @@ void EXTI1_IRQHandler(void)
     SPI_Enable(1);
   } else {
     // Reset SPI3
-    RCC->APB1RSTR |= 1<<14;
-    RCC->APB1RSTR &= ~(1<<14);
+    RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, ENABLE);
+    RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI3, DISABLE);
   }
 
   // Clear interrupt status register

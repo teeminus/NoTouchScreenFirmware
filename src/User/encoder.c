@@ -28,13 +28,13 @@ uint8_t Encoder_Read() {
   #if LCD_ENCODER_SUPPORT
     // Check encoder pins
     if (GPIO_GetLevel(LCD_ENCA_PIN) == 0) {
-        ui8Encoder += 1;
+        ui8Encoder += LCD_ENCODER_A_SET;
     }
     if (GPIO_GetLevel(LCD_ENCB_PIN) == 0) {
-        ui8Encoder += 2;
+        ui8Encoder += LCD_ENCODER_B_SET;
     }
     if (GPIO_GetLevel(LCD_BTN_PIN) == 0) {
-        ui8Encoder += 4;
+        ui8Encoder += LCD_ENCODER_BTN_SET;
     }
   #endif
 

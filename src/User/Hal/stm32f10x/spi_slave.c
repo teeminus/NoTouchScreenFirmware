@@ -49,6 +49,10 @@ void SPI_Slave(CIRCULAR_QUEUE *queue)
   spi_queue = queue;
   spi_queue->index_r = spi_queue->index_w = 0;
 
+  // Reset SPI2
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
+
   // Init SPI
   SPI_GPIO_Init(ST7920_SPI);
   GPIO_InitSet(PB12, MGPIO_MODE_IPU, 0);
@@ -89,6 +93,21 @@ void SPI_Slave(CIRCULAR_QUEUE *queue)
   }
 }
 
+void SPI_SlaveDeinit() {
+  // Disable interrupts
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = SPI2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&NVIC_InitStructure);
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = DISABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  // Reset SPI
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
+  RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
+}
+
 void EXTI15_10_IRQHandler(void)
 {
   // Check CS pin
@@ -97,8 +116,8 @@ void EXTI15_10_IRQHandler(void)
     SPI_Enable(1);
   } else {
     // Reset SPI2
-    RCC->APB1RSTR |= 1<<14;
-    RCC->APB1RSTR &= ~(1<<14);
+    RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);
+    RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, DISABLE);
   }
 
   // Clear interrupt status register

@@ -19,9 +19,11 @@
 #endif
 
 volatile CIRCULAR_QUEUE *spi_queue = NULL;
+volatile uint32_t ui32SpiActivated;
 
-void SPI_Enable(u8 mode)
+static inline void SPI_Enable(u8 cpol, u8 cpha)
 {
+  ++ui32SpiActivated;
   ST7920_SPI_NUM->CR1 = (0<<15)        // 0:2-line 1: 1-line
                       | (0<<14)        // in bidirectional mode 0:read only 1: read/write
                       | (0<<13)        // 0:disable CRC 1:enable CRC
@@ -34,8 +36,8 @@ void SPI_Enable(u8 mode)
                       | (7<<3)         // bit3-5   000:fPCLK/2    001:fPCLK/4    010:fPCLK/8     011:fPCLK/16
                                        //          100:fPCLK/32   101:fPCLK/64   110:fPCLK/128   111:fPCLK/256
                       | (0<<2)         // 0:Slave 1:Master
-                      | (mode<<1)      // CPOL
-                      | (mode<<0);     // CPHA
+                      | (cpol<<1)      // CPOL
+                      | (cpha<<0);     // CPHA
 
   ST7920_SPI_NUM->CR2 |= 1<<6;         // RX buffer not empty interrupt enable SPI_I2S_IT_RXNE
   ST7920_SPI_NUM->CR1 |= (1<<6);
@@ -88,7 +90,7 @@ void SPI_Slave(CIRCULAR_QUEUE *queue)
 
   // Check if we need to enable the SPI interface
   if ((GPIOB->IDR & (1<<12)) != 0) {
-    SPI_Enable(1);
+    SPI_Enable(1, 1);
   }
 }
 
@@ -112,7 +114,11 @@ void EXTI15_10_IRQHandler(void)
   // Check CS pin
   if((GPIOB->IDR & (1<<12)) != 0) {
     // Enable SPI
-    SPI_Enable(1);
+    if ((GPIOB->IDR & (1<<13)) != 0) {
+      SPI_Enable(1, 1);
+    } else {
+      SPI_Enable(0, 1);
+    }
   } else {
     // Reset SPI2
     RCC_APB1PeriphResetCmd(RCC_APB1Periph_SPI2, ENABLE);

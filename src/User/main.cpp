@@ -52,6 +52,8 @@ void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   }
 }
 
+extern volatile uint32_t ui32SpiActivated;
+
 int main(void)
 {
   // Set vector table offset
@@ -130,6 +132,7 @@ int main(void)
   FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
 
   // Init slave SPI
+  ui32SpiActivated = 0;
   CIRCULAR_QUEUE spiQueue;
   SPI_Slave(&spiQueue);
 
@@ -161,8 +164,9 @@ int main(void)
 
   // Variables for SPI data received indicator
 #if defined(SPI_DATA_RECEIVED_INDICATOR)
-  uint16_t ui16X = 0, ui16Y = 0;
-  uint16_t ui16Color = WHITE;
+  uint16_t ui16DX = 0, ui16DY = 0, ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, ui16AY = 0;
+  uint16_t ui16DColor = WHITE, ui16AColor = WHITE;
+  uint32_t ui32LastSpiActivated = 0;
 #endif
 
   // Endless loop
@@ -176,34 +180,62 @@ int main(void)
       // Update SPI data received indicator
 #if defined(SPI_DATA_RECEIVED_INDICATOR)
       // Draw new pixel
-      FILLRECT(ui16X, ui16Y, 1, 1, ui16Color);
+      FILLRECT(ui16DX, ui16DY, 1, 1, ui16DColor);
 
       // Move to next pixel
-      if (ui16X < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
-        ++ui16X;
-      } else if (ui16X == ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
-        ui16X = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2;
-      } else if (ui16X < (LCD_WIDTH - 1)) {
-        ++ui16X;
+      if (ui16DX < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
+        ++ui16DX;
       } else {
-        ui16X = 0;
+        ui16DX = 0;
 
         // Wrap to next line
-        if (ui16Y < 6) {
-          ++ui16Y;
+        if (ui16DY < 6) {
+          ++ui16DY;
         } else {
-          ui16Y = 0;
+          ui16DY = 0;
 
           // Invert color
-          if (ui16Color == WHITE) {
-            ui16Color = BLACK;
+          if (ui16DColor == WHITE) {
+            ui16DColor = BLACK;
           } else {
-            ui16Color = WHITE;
+            ui16DColor = WHITE;
           }
         }
       }
 #endif
     }
+
+    // Update SPI activation display
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
+    while (ui32LastSpiActivated < ui32SpiActivated) {
+      // Draw new pixel
+      FILLRECT(ui16AX, ui16AY, 10, 1, ui16AColor);
+
+      // Move to next pixel
+      if (ui16AX < (LCD_WIDTH - 11)) {
+        ui16AX += 10;
+      } else {
+        ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2;
+
+        // Wrap to next line
+        if (ui16AY < 6) {
+          ++ui16AY;
+        } else {
+          ui16AY = 0;
+
+          // Invert color
+          if (ui16AColor == WHITE) {
+            ui16AColor = BLACK;
+          } else {
+            ui16AColor = WHITE;
+          }
+        }
+      }
+
+      // Update spi activated count
+      ++ui32LastSpiActivated;
+    }
+#endif
 
 #if LCD_ENCODER_SUPPORT
     // Read current encoder value

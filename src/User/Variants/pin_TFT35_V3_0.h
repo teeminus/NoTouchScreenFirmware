@@ -22,6 +22,10 @@
   #define LCD_DATA_16BIT 1 // LCD data 16bit or 8bit
 #endif
 
+// Debug disable, free pins for other function
+//#define DISABLE_JTAG  // free JTAG(PB3/PB4) for SPI3
+//#define DISABLE_DEBUG // free all pins
+
 // LCD Backlight pin (PWM can adjust brightness)
 #define LCD_LED_PIN            PD12
 #define LCD_LED_PIN_ALTERNATE  GPIO_AF_TIM4
@@ -47,5 +51,10 @@
 #define LCD_ENCB_PIN    PC9
 #define LCD_BTN_PIN     PC8
 #define LCD_ENC_EN_PIN  PC6
+
+// PS_ON
+#ifndef PS_ON_PIN
+  #define PS_ON_PIN      PC12 // The string on TFT35 V3.0 board(PA12) is wrong, PC12 is the correct IO
+#endif
 
 #endif

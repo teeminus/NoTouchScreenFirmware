@@ -136,7 +136,7 @@ int main(void)
   st7920Emulator.reset(false);
 
   // Add first part of header line
-  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
+  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, WHITE);
 
   // Init slave SPI
   ui32SpiActivated = 0;
@@ -271,7 +271,7 @@ int main(void)
       }
 
       // Check if timeout has been expired
-      if (ui32Tmp >= 5 * 1000) {
+      if (ui32Tmp >= SPI_RESTART_KNOB_PRESS_DURATION * 1000) {
         // Turn off backlight
         #ifdef LCD_LED_PIN
           LCD_LED_Off();

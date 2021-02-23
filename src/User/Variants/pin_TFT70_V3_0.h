@@ -66,4 +66,9 @@
 #define LCD_BTN_PIN     PC8
 #define LCD_ENC_EN_PIN  PC6
 
+// PS_ON
+#ifndef PS_ON_PIN
+  #define PS_ON_PIN      PC12 // The string on TFT35 V3.0 board(PA12) is wrong, PC12 is the correct IO
+#endif
+
 #endif

@@ -3,6 +3,7 @@
 #include "myfatfs.h"
 #include "ff.h"
 #include "timer.h"
+#include "GPIO_Init.h"
 
 #include "St7920Emulator.hpp"
 
@@ -98,6 +99,12 @@ int main(void)
       f_rename(FIRMWARE_NAME ".bin", FIRMWARE_NAME ".CUR");
     }
   }
+
+  // Init PS_On
+#if defined(PS_ON_PIN)
+  GPIO_InitSet(PS_ON_PIN, MGPIO_MODE_OUT_PP, 0);
+  GPIO_SetLevel(PS_ON_PIN, 1);
+#endif
 
   // Init LCD
   LCD_Init(&rccClocks);

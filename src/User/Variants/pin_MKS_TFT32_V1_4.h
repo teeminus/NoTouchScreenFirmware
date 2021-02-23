@@ -58,4 +58,11 @@
 #endif
 #define DISABLE_DEBUG
 
+// PS_ON
+#if !defined(ST7920_SPI) || defined(SPI3_PIN_SMART_USAGE)
+  #ifndef PS_ON_PIN
+    #define PS_ON_PIN      PB0
+  #endif
+#endif
+
 #endif

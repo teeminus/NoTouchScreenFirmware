@@ -53,6 +53,8 @@ void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   }
 }
 
+extern volatile uint32_t ui32SpiActivated;
+
 int main(void)
 {
   // Set vector table offset
@@ -67,6 +69,18 @@ int main(void)
 
   // Init delay
   Delay_init(rccClocks.HCLK_Frequency);
+
+  // Disable JTAG
+  #ifdef DISABLE_JTAG
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); // disable JTAG, enable SWD
+  #endif
+
+  // Disable SWJ
+  #ifdef DISABLE_DEBUG
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE); //disable JTAG & SWD
+  #endif
 
   // Mount SD card
   if(mountSDCard())
@@ -121,21 +135,45 @@ int main(void)
   }
   st7920Emulator.reset(false);
 
+  // Add first part of header line
+  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, WHITE);
+
   // Init slave SPI
+  ui32SpiActivated = 0;
   CIRCULAR_QUEUE spiQueue;
   SPI_Slave(&spiQueue);
 
-  // Check if lcd idle off is enabled
-#if defined(LCD_IDLE_OFF)
+  // Init encoder
+  Encoder_Init();
+
+  // Check for encoder support
+#if LCD_ENCODER_SUPPORT
   // Init timer
   Timer_Init(&rccClocks);
 
+  // Loop variables
+  uint8_t ui8CurrentEncoder;
+  uint32_t ui32CurrentMs;
+  uint32_t ui32FirstBtnPress = 0;
+  uint32_t ui32Tmp;
+#endif
+
+  // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
   // Loop veriables
   bool bScreenOn = true;
-  uint8_t ui8CurrentEncoder;
   uint8_t ui8LastEncoder = 0;
-  uint32_t ui32CurrentMs;
   uint32_t ui32LastActive = 0;
+#endif
+
+  // Add second part of header line
+  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
+
+  // Variables for SPI data received indicator
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
+  uint16_t ui16DX = 0, ui16DY = 0, ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, ui16AY = 0;
+  uint16_t ui16DColor = WHITE, ui16AColor = WHITE;
+  uint32_t ui32LastSpiActivated = 0;
 #endif
 
   // Endless loop
@@ -145,16 +183,125 @@ int main(void)
     if (SPI_SlaveGetData(&data)) {
       // Parse data
       st7920Emulator.parseSerialData(data);
+
+      // Update SPI data received indicator
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
+      // Draw new pixel
+      FILLRECT(ui16DX, ui16DY, 1, 1, ui16DColor);
+
+      // Move to next pixel
+      if (ui16DX < ((LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 2)) {
+        ++ui16DX;
+      } else {
+        ui16DX = 0;
+
+        // Wrap to next line
+        if (ui16DY < 6) {
+          ++ui16DY;
+        } else {
+          ui16DY = 0;
+
+          // Invert color
+          if (ui16DColor == WHITE) {
+            ui16DColor = BLACK;
+          } else {
+            ui16DColor = WHITE;
+          }
+        }
+      }
+#endif
     }
 
-    // Check if lcd idle off is enabled
-#if defined(LCD_IDLE_OFF)
+    // Update SPI activation display
+#if defined(SPI_DATA_RECEIVED_INDICATOR)
+    while (ui32LastSpiActivated < ui32SpiActivated) {
+      // Draw new pixel
+      FILLRECT(ui16AX, ui16AY, 10, 1, ui16AColor);
+
+      // Move to next pixel
+      if (ui16AX < (LCD_WIDTH - 11)) {
+        ui16AX += 10;
+      } else {
+        ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2;
+
+        // Wrap to next line
+        if (ui16AY < 6) {
+          ++ui16AY;
+        } else {
+          ui16AY = 0;
+
+          // Invert color
+          if (ui16AColor == WHITE) {
+            ui16AColor = BLACK;
+          } else {
+            ui16AColor = WHITE;
+          }
+        }
+      }
+
+      // Update spi activated count
+      ++ui32LastSpiActivated;
+    }
+#endif
+
+#if LCD_ENCODER_SUPPORT
     // Read current encoder value
     ui8CurrentEncoder = Encoder_Read();
 
     // Get current time
     ui32CurrentMs = Timer_GetTimerMs();
 
+    // Check if encoder button is pressed
+    if ((ui8CurrentEncoder & LCD_ENCODER_BTN_SET) > 0) {
+      // Check if we need to store the current timestamp
+      if (ui32FirstBtnPress == 0) {
+        // Store current timestamp
+        if (ui32CurrentMs == 0) {
+          ui32FirstBtnPress = 1;
+        } else {
+          ui32FirstBtnPress = ui32CurrentMs;
+        }
+      }
+    } else if (ui32FirstBtnPress > 0) {
+      // Get difference to last active timestamp
+      if (ui32CurrentMs >= ui32FirstBtnPress) {
+        ui32Tmp = ui32CurrentMs - ui32FirstBtnPress;
+      } else {
+        ui32Tmp = 0xFFFFFFFF - ui32FirstBtnPress + ui32CurrentMs + 1;
+      }
+
+      // Check if timeout has been expired
+      if (ui32Tmp >= SPI_RESTART_KNOB_PRESS_DURATION * 1000) {
+        // Turn off backlight
+        #ifdef LCD_LED_PIN
+          LCD_LED_Off();
+        #endif
+
+        // Reset SPI
+        SPI_SlaveDeinit();
+
+        // Wait half a second
+        Delay_ms(100);
+
+        // Init SPI
+        SPI_Slave(&spiQueue);
+
+        // Turn on backlight
+        #ifdef LCD_LED_PIN
+          LCD_LED_On();
+        #endif
+
+        // Reset emulator
+        st7920Emulator.reset(true);
+      }
+
+      // Clear falg
+      ui32FirstBtnPress = 0;
+    }
+#endif
+
+    // Check if lcd idle off is enabled
+#if defined(LCD_IDLE_OFF)
     // Compare to last value
     if (ui8CurrentEncoder != ui8LastEncoder) {
       // Store current value
@@ -176,13 +323,13 @@ int main(void)
     else if (bScreenOn) {
       // Get difference to last active timestamp
       if (ui32CurrentMs >= ui32LastActive) {
-        ui32CurrentMs = ui32CurrentMs - ui32LastActive;
+        ui32Tmp = ui32CurrentMs - ui32LastActive;
       } else {
-        ui32CurrentMs = 0xFFFFFFFF - ui32LastActive + ui32CurrentMs + 1;
+        ui32Tmp = 0xFFFFFFFF - ui32LastActive + ui32CurrentMs + 1;
       }
 
       // Check inactivity time
-      if (ui32CurrentMs >= LCD_IDLE_TIMEOUT_SEC * 1000) {
+      if (ui32Tmp >= LCD_IDLE_TIMEOUT_SEC * 1000) {
         // Turn off screen
         LCD_LED_Off();
 

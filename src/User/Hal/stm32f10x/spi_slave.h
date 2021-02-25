@@ -12,6 +12,7 @@ extern "C" {
 
 void SPI_Slave(CIRCULAR_QUEUE *queue);
 bool SPI_SlaveGetData(uint8_t *data);
+void SPI_SlaveDeinit();
 
 #ifdef __cplusplus
 }

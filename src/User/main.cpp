@@ -15,8 +15,7 @@
 #define ST7920_GXSTART ((LCD_WIDTH - ST7920_DOTSIZE * ST7920_GXROWS) / 2)
 #define ST7920_GYSTART ((LCD_HEIGHT - ST7920_DOTSIZE * ST7920_GYROWS) / 2)
 
-//#define ROTATE_180
-#if defined(ROTATE_180)
+#if defined(LCD_ROTATE_180)
   #define FILLRECT(X,Y,W,H,C) \
   { \
     uint16_t x0 = LCD_WIDTH - (X) - (W) - 1; \

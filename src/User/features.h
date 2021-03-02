@@ -18,3 +18,6 @@
 #if defined(LCD_IDLE_OFF)
     #define LCD_IDLE_TIMEOUT_SEC 5
 #endif
+
+// Rotate screen by 180°
+//#define LCD_ROTATE_180

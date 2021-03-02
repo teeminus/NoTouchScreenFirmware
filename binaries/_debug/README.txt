@@ -1,0 +1,1 @@
+This folder contains firmware binaries which have been compiled with the SPI_DATA_RECEIVED_INDICATOR enabled. These binaries can be used to check if the display receives data from the host.

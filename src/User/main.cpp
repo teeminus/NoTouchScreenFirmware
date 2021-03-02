@@ -7,6 +7,9 @@
 
 #include "St7920Emulator.hpp"
 
+#define COLOR_FOREGROUND WHITE
+#define COLOR_BACKGROUND BLACK
+
 #define ST7920_GXROWS  128
 #define ST7920_GYROWS  64
 #define ST7920_GXSTART ((LCD_WIDTH - ST7920_DOTSIZE * ST7920_GXROWS) / 2)
@@ -31,7 +34,7 @@ void clearDisplay() {
            ST7920_GYSTART,
            ST7920_DOTSIZE * ST7920_GXROWS,
            ST7920_DOTSIZE * ST7920_GYROWS,
-           BLACK);
+           COLOR_BACKGROUND);
 }
 void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   // Loop over all bits
@@ -42,13 +45,13 @@ void drawByte(uint8_t x, uint8_t y, uint8_t d) {
                ST7920_GYSTART + y * ST7920_DOTSIZE,
                ST7920_DOTSIZE,
                ST7920_DOTSIZE,
-               WHITE);
+               COLOR_FOREGROUND);
     } else {
       FILLRECT(ST7920_GXSTART + x * ST7920_DOTSIZE,
               ST7920_GYSTART + y * ST7920_DOTSIZE,
               ST7920_DOTSIZE,
               ST7920_DOTSIZE,
-              BLACK);
+              COLOR_BACKGROUND);
     }
   }
 }
@@ -107,17 +110,14 @@ int main(void)
 #endif
 
   // Init LCD
-  LCD_Init(&rccClocks);
-
-  // Clear screen
-  GUI_Clear(BLACK);
+  LCD_Init(&rccClocks, COLOR_BACKGROUND);
 
   // Show title
   const uint8_t pTitle[] = {0x7F, 0x02, 0x04, 0x08, 0x7F, 0x38, 0x44, 0x44, 0x44, 0x38, 0x01, 0x01, 0x7F, 0x01, 0x01, 0x38, 0x44, 0x44, 0x44, 0x38, 0x3C, 0x40, 0x20, 0x7C, 0x00, 0x38, 0x44, 0x44, 0x44, 0x28, 0x7F, 0x04, 0x04, 0x78, 0x00, 0x7F, 0x09, 0x09, 0x09, 0x01, 0x3C, 0x60, 0x30, 0x60, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x20, 0x40, 0x20, 0x1F, 0x00, 0x42, 0x7F, 0x40, 0x00, 0x00, 0x60, 0x60, 0x00, 0x00, 0x62, 0x51, 0x49, 0x49, 0x46};
   for (uint16_t i = 0, x = (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2; i < sizeof(pTitle); ++i, ++x) {
     for (uint8_t y = 0; y < 8; ++y) {
       if ((pTitle[i] & (1 << y)) > 0) {
-        FILLRECT(x, y, 1, 1, WHITE);
+        FILLRECT(x, y, 1, 1, COLOR_FOREGROUND);
       }
     }
     if ((i % 5) == 4) {
@@ -136,7 +136,7 @@ int main(void)
   st7920Emulator.reset(false);
 
   // Add first part of header line
-  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, WHITE);
+  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, COLOR_FOREGROUND);
 
   // Init slave SPI
   ui32SpiActivated = 0;
@@ -167,12 +167,12 @@ int main(void)
 #endif
 
   // Add second part of header line
-  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, WHITE);
+  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, COLOR_FOREGROUND);
 
   // Variables for SPI data received indicator
 #if defined(SPI_DATA_RECEIVED_INDICATOR)
   uint16_t ui16DX = 0, ui16DY = 0, ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, ui16AY = 0;
-  uint16_t ui16DColor = WHITE, ui16AColor = WHITE;
+  uint16_t ui16DColor = COLOR_FOREGROUND, ui16AColor = COLOR_FOREGROUND;
   uint32_t ui32LastSpiActivated = 0;
 #endif
 
@@ -202,10 +202,10 @@ int main(void)
           ui16DY = 0;
 
           // Invert color
-          if (ui16DColor == WHITE) {
-            ui16DColor = BLACK;
+          if (ui16DColor == COLOR_FOREGROUND) {
+            ui16DColor = COLOR_BACKGROUND;
           } else {
-            ui16DColor = WHITE;
+            ui16DColor = COLOR_FOREGROUND;
           }
         }
       }
@@ -231,10 +231,10 @@ int main(void)
           ui16AY = 0;
 
           // Invert color
-          if (ui16AColor == WHITE) {
-            ui16AColor = BLACK;
+          if (ui16AColor == COLOR_FOREGROUND) {
+            ui16AColor = COLOR_BACKGROUND;
           } else {
-            ui16AColor = WHITE;
+            ui16AColor = COLOR_FOREGROUND;
           }
         }
       }
@@ -280,7 +280,7 @@ int main(void)
         // Reset SPI
         SPI_SlaveDeinit();
 
-        // Wait half a second
+        // Wait 100ms
         Delay_ms(100);
 
         // Init SPI

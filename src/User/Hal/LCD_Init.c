@@ -502,11 +502,11 @@ void LCD_RefreshDirection(void)
   LCD_WR_DATA(TFTLCD_0_DEGREE_REG_VALUE);
 }
 
-void LCD_Init(RCC_ClocksTypeDef* rccClocks)
+void LCD_Init(RCC_ClocksTypeDef* rccClocks, uint16_t ui16BackColor)
 {
   LCD_HardwareConfig();
   LCD_init_RGB();
-  GUI_Clear(BLACK);
+  GUI_Clear(ui16BackColor);
   Delay_ms(120);
 
 #ifdef LCD_LED_PIN

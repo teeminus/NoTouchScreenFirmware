@@ -5,7 +5,7 @@
 #define LCD_COLOR_BACKGROUND BLACK
 
 // Enable fullscreen mode
-#define LCD_FULLSCREEN
+//#define LCD_FULLSCREEN
 
 // Rotate screen by 180°
 //#define LCD_ROTATE_180

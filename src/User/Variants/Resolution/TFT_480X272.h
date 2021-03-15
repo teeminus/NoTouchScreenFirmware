@@ -3,6 +3,5 @@
 
 #define LCD_WIDTH   480
 #define LCD_HEIGHT  272
-#define ST7920_DOTSIZE 3
 
 #endif

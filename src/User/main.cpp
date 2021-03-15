@@ -7,19 +7,34 @@
 
 #include "St7920Emulator.hpp"
 
-#define COLOR_FOREGROUND WHITE
-#define COLOR_BACKGROUND BLACK
-
-#define ST7920_GXROWS  128
-#define ST7920_GYROWS  64
-#define ST7920_GXSTART ((LCD_WIDTH - ST7920_DOTSIZE * ST7920_GXROWS) / 2)
-#define ST7920_GYSTART ((LCD_HEIGHT - ST7920_DOTSIZE * ST7920_GYROWS) / 2)
+#define ST7920_GXROWS 128.0
+#define ST7920_GYROWS 64.0
+#if defined(LCD_FULLSCREEN)
+  typedef float lcd_pixel_type;
+#else
+  typedef uint16_t lcd_pixel_type;
+#endif
+lcd_pixel_type st7920PixelSize;
+lcd_pixel_type st7920StartX;
+lcd_pixel_type st7920StartY;
+static inline lcd_pixel_type min(lcd_pixel_type a, lcd_pixel_type b) {
+  if (a < b) {
+    return a;
+  }
+  return b;
+}
+static inline lcd_pixel_type max(lcd_pixel_type a, lcd_pixel_type b) {
+  if (a > b) {
+    return a;
+  }
+  return b;
+}
 
 #if defined(LCD_ROTATE_180)
   #define FILLRECT(X,Y,W,H,C) \
   { \
-    uint16_t x0 = LCD_WIDTH - (X) - (W) - 1; \
-    uint16_t y0 = LCD_HEIGHT - (Y) - (H) - 1; \
+    lcd_pixel_type x0 = LCD_WIDTH - (X) - (W) - 1; \
+    lcd_pixel_type y0 = LCD_HEIGHT - (Y) - (H) - 1; \
     GUI_FillRectColor(x0, y0, x0 + W, y0 + H, C); \
   }
 #else
@@ -29,29 +44,21 @@
 
 void clearDisplay() {
   // Clear ST7920 gui rect
-  FILLRECT(ST7920_GXSTART,
-           ST7920_GYSTART,
-           ST7920_DOTSIZE * ST7920_GXROWS,
-           ST7920_DOTSIZE * ST7920_GYROWS,
-           COLOR_BACKGROUND);
+  FILLRECT(st7920StartX,
+           st7920StartY,
+           st7920PixelSize * ST7920_GXROWS,
+           st7920PixelSize * ST7920_GYROWS,
+           LCD_COLOR_BACKGROUND);
 }
 void drawByte(uint8_t x, uint8_t y, uint8_t d) {
   // Loop over all bits
   for (uint8_t i = 0; i < 8; ++i, ++x) {
-    // Check if bit is set
-    if ((d & (1 << i)) > 0) {
-      FILLRECT(ST7920_GXSTART + x * ST7920_DOTSIZE,
-               ST7920_GYSTART + y * ST7920_DOTSIZE,
-               ST7920_DOTSIZE,
-               ST7920_DOTSIZE,
-               COLOR_FOREGROUND);
-    } else {
-      FILLRECT(ST7920_GXSTART + x * ST7920_DOTSIZE,
-              ST7920_GYSTART + y * ST7920_DOTSIZE,
-              ST7920_DOTSIZE,
-              ST7920_DOTSIZE,
-              COLOR_BACKGROUND);
-    }
+    // Draw pixel
+    FILLRECT(st7920StartX + x * st7920PixelSize,
+             st7920StartY + y * st7920PixelSize,
+             st7920PixelSize,
+             st7920PixelSize,
+             ((d & (1 << i)) > 0) ? LCD_COLOR_FOREGROUND : LCD_COLOR_BACKGROUND);
   }
 }
 
@@ -109,14 +116,19 @@ int main(void)
 #endif
 
   // Init LCD
-  LCD_Init(&rccClocks, COLOR_BACKGROUND);
+  LCD_Init(&rccClocks, LCD_COLOR_BACKGROUND);
+
+  // Calculate ST7920 screen dimensions
+  st7920PixelSize = min(LCD_WIDTH / ST7920_GXROWS, (LCD_HEIGHT - 8) / ST7920_GYROWS);
+  st7920StartX = (LCD_WIDTH - st7920PixelSize * ST7920_GXROWS) / 2;
+  st7920StartY = max(8, (LCD_HEIGHT - st7920PixelSize * ST7920_GYROWS) / 2);
 
   // Show title
   const uint8_t pTitle[] = {0x7F, 0x02, 0x04, 0x08, 0x7F, 0x38, 0x44, 0x44, 0x44, 0x38, 0x01, 0x01, 0x7F, 0x01, 0x01, 0x38, 0x44, 0x44, 0x44, 0x38, 0x3C, 0x40, 0x20, 0x7C, 0x00, 0x38, 0x44, 0x44, 0x44, 0x28, 0x7F, 0x04, 0x04, 0x78, 0x00, 0x7F, 0x09, 0x09, 0x09, 0x01, 0x3C, 0x60, 0x30, 0x60, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x20, 0x40, 0x20, 0x1F, 0x00, 0x42, 0x7F, 0x40, 0x00, 0x00, 0x60, 0x60, 0x00, 0x00, 0x22, 0x49, 0x49, 0x49, 0x36};
   for (uint16_t i = 0, x = (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2; i < sizeof(pTitle); ++i, ++x) {
     for (uint8_t y = 0; y < 8; ++y) {
       if ((pTitle[i] & (1 << y)) > 0) {
-        FILLRECT(x, y, 1, 1, COLOR_FOREGROUND);
+        FILLRECT(x, y, 1, 1, LCD_COLOR_FOREGROUND);
       }
     }
     if ((i % 5) == 4) {
@@ -135,7 +147,7 @@ int main(void)
   st7920Emulator.reset(false);
 
   // Add first part of header line
-  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, COLOR_FOREGROUND);
+  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, LCD_COLOR_FOREGROUND);
 
   // Init slave SPI
   ui32SpiActivated = 0;
@@ -166,12 +178,12 @@ int main(void)
 #endif
 
   // Add second part of header line
-  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, COLOR_FOREGROUND);
+  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, LCD_COLOR_FOREGROUND);
 
   // Variables for SPI data received indicator
 #if defined(SPI_DATA_RECEIVED_INDICATOR)
   uint16_t ui16DX = 0, ui16DY = 0, ui16AX = (LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, ui16AY = 0;
-  uint16_t ui16DColor = COLOR_FOREGROUND, ui16AColor = COLOR_FOREGROUND;
+  uint16_t ui16DColor = LCD_COLOR_FOREGROUND, ui16AColor = LCD_COLOR_FOREGROUND;
   uint32_t ui32LastSpiActivated = 0;
 #endif
 
@@ -201,10 +213,10 @@ int main(void)
           ui16DY = 0;
 
           // Invert color
-          if (ui16DColor == COLOR_FOREGROUND) {
-            ui16DColor = COLOR_BACKGROUND;
+          if (ui16DColor == LCD_COLOR_FOREGROUND) {
+            ui16DColor = LCD_COLOR_BACKGROUND;
           } else {
-            ui16DColor = COLOR_FOREGROUND;
+            ui16DColor = LCD_COLOR_FOREGROUND;
           }
         }
       }
@@ -230,10 +242,10 @@ int main(void)
           ui16AY = 0;
 
           // Invert color
-          if (ui16AColor == COLOR_FOREGROUND) {
-            ui16AColor = COLOR_BACKGROUND;
+          if (ui16AColor == LCD_COLOR_FOREGROUND) {
+            ui16AColor = LCD_COLOR_BACKGROUND;
           } else {
-            ui16AColor = COLOR_FOREGROUND;
+            ui16AColor = LCD_COLOR_FOREGROUND;
           }
         }
       }

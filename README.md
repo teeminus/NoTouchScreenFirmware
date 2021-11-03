@@ -12,12 +12,12 @@ Precompiled binares can be found in the [binares](binaries) folder.
 |----------------------------------------------------------|--------|
 | [BIGTREE_TFT24_V1_1](binaries/BIGTREE_TFT24_V1_1)        | YES    |
 | [BIGTREE_TFT28_V3_0](binaries/BIGTREE_TFT28_V3_0)        | NO     |
-| [BIGTREE_TFT35_B1_V3_0](binaries/BIGTREE_TFT35_B1_V3_0)  | NO     |
+| [BIGTREE_TFT35_B1_V3_0](binaries/BIGTREE_TFT35_B1_V3_0)  | YES    |
 | [BIGTREE_TFT35_E3_V3_0](binaries/BIGTREE_TFT35_E3_V3_0)  | YES    |
 | [BIGTREE_TFT35_V3_0](binaries/BIGTREE_TFT35_V3_0)        | YES    |
-| [BIGTREE_TFT43_V3_0](binaries/BIGTREE_TFT43_V3_0)        | NO     |
-| [BIGTREE_TFT50_V3_0](binaries/BIGTREE_TFT50_V3_0)        | NO     |
-| [BIGTREE_TFT70_V3_0](binaries/BIGTREE_TFT70_V3_0)        | NO     |
+| [BIGTREE_TFT43_V3_0](binaries/BIGTREE_TFT43_V3_0)        | YES    |
+| [BIGTREE_TFT50_V3_0](binaries/BIGTREE_TFT50_V3_0)        | YES    |
+| [BIGTREE_TFT70_V3_0](binaries/BIGTREE_TFT70_V3_0)        | YES    |
 | [MKS_28_V1_0](binaries/MKS_28_V1_0)                      | NO     |
 | [MKS_32_V1_4](binaries/MKS_32_V1_4)                      | NO     |
 | [MKS_32_V1_4_NOBL](binaries/MKS_32_V1_4_NOBL)            | NO     |

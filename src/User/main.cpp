@@ -24,17 +24,18 @@ static inline lcd_pixel_type min(lcd_pixel_type a, lcd_pixel_type b) {
   return b;
 }
 
-#if defined(LCD_ROTATE_180)
-  #define FILLRECT(X,Y,W,H,C) \
-  { \
-    lcd_pixel_type x0 = LCD_WIDTH - (X) - (W) - 1; \
-    lcd_pixel_type y0 = LCD_HEIGHT - (Y) - (H) - 1; \
-    GUI_FillRectColor(x0, y0, x0 + W, y0 + H, C); \
-  }
+#if defined(LCD_MIRROR_HORIZONTALLY)
+  #define _X(X,W) (LCD_WIDTH - (X) - (W) - 1)
 #else
-  #define FILLRECT(X,Y,W,H,C) \
-    GUI_FillRectColor(X, Y, X + W, Y + H, C);
+  #define _X(X,W) (X)
 #endif
+#if defined(LCD_MIRROR_VERTICALLY)
+  #define _Y(Y,H) (LCD_HEIGHT - (Y) - (H) - 1)
+#else
+  #define _Y(Y,H) (Y)
+#endif
+#define FILLRECT(X,Y,W,H,C) \
+  GUI_FillRectColor(_X(X,W), _Y(Y,H), _X(X,W) + W, _Y(Y,H) + H, C);
 
 void clearDisplay() {
   // Clear ST7920 gui rect
@@ -141,7 +142,7 @@ int main(void)
   st7920Emulator.reset(false);
 
   // Add first part of header line
-  FILLRECT(0, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2 - 1, 1, LCD_COLOR_FOREGROUND);
+  FILLRECT(0, 7, LCD_WIDTH / 2 - sizeof(pTitle) / 5 * 3 - 1, 1, LCD_COLOR_FOREGROUND);
 
   // Init slave SPI
   ui32SpiActivated = 0;
@@ -172,7 +173,7 @@ int main(void)
 #endif
 
   // Add second part of header line
-  FILLRECT((LCD_WIDTH + sizeof(pTitle) / 5 * 6) / 2, 7, (LCD_WIDTH - sizeof(pTitle) / 5 * 6) / 2, 1, LCD_COLOR_FOREGROUND);
+  FILLRECT(LCD_WIDTH / 2 + sizeof(pTitle) / 5 * 3, 7, LCD_WIDTH / 2 - sizeof(pTitle) / 5 * 3, 1, LCD_COLOR_FOREGROUND);
 
   // Variables for SPI data received indicator
 #if defined(SPI_DATA_RECEIVED_INDICATOR)

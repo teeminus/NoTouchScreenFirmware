@@ -7,8 +7,18 @@
 // Enable fullscreen mode
 #define LCD_FULLSCREEN
 
+// Mirror screen horizontally
+//#define LCD_MIRROR_HORIZONTALLY
+
+// Mirror screen vertically
+//#define LCD_MIRROR_VERTICALLY
+
 // Rotate screen by 180°
 //#define LCD_ROTATE_180
+#if defined(LCD_ROTATE_180)
+    #define LCD_MIRROR_HORIZONTALLY
+    #define LCD_MIRROR_VERTICALLY
+#endif
 
 // Enable LCD backlight idle off
 //#define LCD_IDLE_OFF

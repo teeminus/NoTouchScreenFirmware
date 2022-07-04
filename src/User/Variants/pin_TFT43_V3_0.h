@@ -27,6 +27,11 @@
   #define SSD_VER_FRONT_PORCH  1
 #endif
 
+// Neopixel LEDs number
+#ifndef NEOPIXEL_PIXELS
+  #define NEOPIXEL_PIXELS 2
+#endif
+
 #include "pin_TFT35_E3_V3_0.h"
 
 #endif

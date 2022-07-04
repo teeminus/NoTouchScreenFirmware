@@ -113,6 +113,11 @@ int main(void)
   // Init LCD
   LCD_Init(&rccClocks, LCD_COLOR_BACKGROUND);
 
+  // Init knob LED
+#if defined(KNOB_RGB_ENABLE)
+  KnobLed_Init();
+#endif
+
   // Calculate ST7920 screen dimensions
   st7920PixelSize = min(LCD_WIDTH / ST7920_GXROWS, (LCD_HEIGHT - 8) / ST7920_GYROWS);
   st7920StartX = (LCD_WIDTH - st7920PixelSize * ST7920_GXROWS) / 2;
@@ -297,6 +302,11 @@ int main(void)
           LCD_LED_On();
         #endif
 
+        // Turn on knob LED
+        #ifdef KNOB_RGB_ENABLE
+          KnobLed_On();
+        #endif
+
         // Reset emulator
         st7920Emulator.reset(true);
       }
@@ -318,6 +328,11 @@ int main(void)
         // Turn on screen
         LCD_LED_On();
 
+        // Turn on knob LED
+        #ifdef KNOB_RGB_ENABLE
+          KnobLed_On();
+        #endif
+
         // Set flag
         bScreenOn = true;
       }
@@ -338,6 +353,11 @@ int main(void)
       if (ui32Tmp >= LCD_IDLE_TIMEOUT_SEC * 1000) {
         // Turn off screen
         LCD_LED_Off();
+
+        // Turn off knob LED
+        #ifdef KNOB_RGB_ENABLE
+          KnobLed_Off();
+        #endif
 
         // Clear flag
         bScreenOn = false;

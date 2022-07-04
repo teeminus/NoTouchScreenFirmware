@@ -45,6 +45,18 @@
 #define LCD_LED_PIN_ALTERNATE  GPIO_AF_TIM4
 #define LCD_LED_PWM_CHANNEL    _TIM4_CH1
 
+// Knob LED Color pins
+#ifndef KNOB_LED_COLOR_PIN
+  #define KNOB_LED_COLOR_PIN       PC7
+  #define WS2812_FAST_WRITE_HIGH() GPIOC->BSRRL = 1 << 7
+  #define WS2812_FAST_WRITE_LOW()  GPIOC->BSRRH = 1 << 7
+#endif
+
+// Neopixel LEDs number
+#ifndef NEOPIXEL_PIXELS
+  #define NEOPIXEL_PIXELS 2
+#endif
+
 // SD Card SPI pins
 #define SD_SPI_SUPPORT
 #ifdef SD_SPI_SUPPORT

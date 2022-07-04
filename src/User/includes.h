@@ -24,6 +24,7 @@
 #include "CircularQueue.h"
 #include "spi_slave.h"
 #include "encoder.h"
+#include "knobled.h"
 
 #ifndef ST7920_SPI
   #error "No ST7920"
@@ -57,5 +58,21 @@
     #error "LCD_IDLE_OFF requires LCD_LED_PIN"
   #endif
 #endif
-
+#if defined(KNOB_RGB_ENABLE)
+    #if !defined(KNOB_LED_COLOR_PIN)
+        #error "KNOB_LED_COLOR_PIN not defined"
+    #endif
+    #if !defined(NEOPIXEL_PIXELS)
+        #error "NEOPIXEL_PIXELS not defined"
+    #endif
+    #if !defined(WS2812_FAST_WRITE_HIGH)
+        #error "WS2812_FAST_WRITE_HIGH not defined"
+    #endif
+    #if !defined(WS2812_FAST_WRITE_LOW)
+        #error "WS2812_FAST_WRITE_LOW not defined"
+    #endif
+    #if !defined(KNOB_RGB_COLOR)
+        #error "KNOB_RGB_COLOR not defined"
+    #endif
+#endif
 #endif

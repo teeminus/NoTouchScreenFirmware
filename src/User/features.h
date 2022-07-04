@@ -38,3 +38,10 @@
 
 // Rotary knob long press duration for SPI restart
 #define SPI_RESTART_KNOB_PRESS_DURATION 3
+
+// Enable knob RGB led
+//#define KNOB_RGB_ENABLE
+#if defined(KNOB_RGB_ENABLE)
+    // Knob GRB color
+    #define KNOB_RGB_COLOR 0xFFFFFF
+#endif

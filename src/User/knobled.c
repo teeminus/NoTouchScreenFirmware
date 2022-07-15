@@ -37,10 +37,9 @@ void KnobLed_Set(uint32_t color) {
     TIM6->CR1 |= 0x01;
 
     // Loop over all LEDs
-    uint32_t bit;
-    for (uint8_t led_num = 0; led_num < NEOPIXEL_PIXELS; ++ led_num) {
+    for (uint8_t led_num = 0; led_num < NEOPIXEL_PIXELS; ++led_num) {
         // Loop over all bits
-        for (bit = 23; bit >= 0; bit--) {
+        for (uint8_t bit = 0; bit < 24; ++bit, color <<= 1) {
             // Clear timer counter
             TIM6->CNT = 0;
 
@@ -48,7 +47,7 @@ void KnobLed_Set(uint32_t color) {
             WS2812_FAST_WRITE_HIGH();
 
             // Check if bit is set and wait accordingly
-            if (color & (1 << bit)) {
+            if (color & (1 << 23)) {
                 while (TIM6->CNT < code_1_tim_h_cnt);
             } else {
                 while (TIM6->CNT < code_0_tim_h_cnt);

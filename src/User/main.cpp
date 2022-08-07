@@ -115,7 +115,7 @@ int main(void)
 
   // Init knob LED
 #if defined(KNOB_RGB_ENABLE)
-  KnobLed_Init();
+  KnobLed_Init(rccClocks.PCLK1_Frequency);
 #endif
 
   // Calculate ST7920 screen dimensions

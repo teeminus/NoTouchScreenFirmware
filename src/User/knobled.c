@@ -8,7 +8,7 @@
 #define NEOPIXEL_T1H_US 2.15  // Neopixel code 1 high level hold time in us
 uint16_t cycle, code_0_tim_h_cnt, code_1_tim_h_cnt;
 
-void KnobLed_Init() {
+void KnobLed_Init(uint32_t PCLK1_Frequency) {
     // Init hardware pin
     GPIO_InitSet(KNOB_LED_COLOR_PIN, MGPIO_MODE_OUT_PP, 0);
     GPIO_SetLevel(KNOB_LED_COLOR_PIN, 0);
@@ -20,7 +20,7 @@ void KnobLed_Init() {
     TIM6->SR = (uint16_t)~(1 << 0);
 
     // Calculate timings
-    cycle = TIM7->PSC * (0.000001 * (NEOPIXEL_T0H_US + NEOPIXEL_T1H_US)) / 2 - 1;  // Neopixel frequency
+    cycle = PCLK1_Frequency * (0.000001 * (NEOPIXEL_T0H_US + NEOPIXEL_T1H_US)) / 2 - 1;  // Neopixel frequency
     code_0_tim_h_cnt = cycle * (NEOPIXEL_T0H_US / (NEOPIXEL_T0H_US + NEOPIXEL_T1H_US));  // Code 0, High level hold time,
     code_1_tim_h_cnt = cycle - code_0_tim_h_cnt;
 
